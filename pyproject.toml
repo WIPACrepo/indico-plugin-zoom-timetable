@@ -1,0 +1,47 @@
+[project]
+name = 'indico-plugin-zoom-timetable'
+description = 'Zoom join buttons on the timetable of Indico conference events'
+readme = 'README.md'
+version = '3.3'
+license = 'MIT'
+authors = [{ name = 'WIPAC', email = 'developers@icecube.wisc.edu' }]
+classifiers = [
+    'Environment :: Plugins',
+    'Environment :: Web Environment',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3.12',
+]
+requires-python = '>=3.12.2, <3.13'
+dependencies = ['indico>=3.3']
+
+[project.urls]
+GitHub = 'https://github.com/WIPACrepo/Indico-plugin-zoom-timetable'
+
+[project.entry-points.'indico.plugins']
+zoom_timetable = 'indico_zoom_timetable.plugin:ZoomTimetablePlugin'
+
+[build-system]
+requires = ['hatchling==1.25.0']
+build-backend = 'hatchling.build'
+
+[tool.hatch.build]
+packages = ['indico_zoom_timetable']
+exclude = [
+    '*.no-header',
+    '.keep',
+    # exclude original client sources (they are all included in source maps anyway)
+    'indico_*/client/',
+    # no need for tests outside development
+    'test_snapshots/',
+    'tests/',
+    '*_test.py',
+]
+artifacts = [
+    'indico_*/translations/**/messages-react.json',
+    'indico_*/translations/**/*.mo',
+    'indico_*/static/dist/',
+]
+
+[tool.hatch.build.targets.sdist.hooks.custom]
+path = 'hatch_build.py'
+dependencies = ['babel==2.16.0']

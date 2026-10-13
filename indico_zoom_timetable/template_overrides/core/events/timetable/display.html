@@ -1,0 +1,9 @@
+{#- zoom_timetable plugin: mark timetable entries that have a videoconference room -#}
+{% extends '~events/timetable/display.html' %}
+
+{% block content %}
+    {#- right under the "Timetable" heading: the key for the red "live" dot on the entries -#}
+    {{ template_hook('zoom-timetable-key', event=event) }}
+    {{ template_hook('zoom-timetable-markers', event=event) }}
+    {{ super() }}
+{% endblock %}

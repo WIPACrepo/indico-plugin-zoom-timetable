@@ -1,0 +1,76 @@
+<style>
+    .zt-title { font-weight: bold; }
+    .zt-buttons { flex-shrink: 0; }
+    .zt-buttons .right.vc-toolbar { float: none; }
+    .zt-buttons img { vertical-align: middle; }
+
+    .zt-balloon { padding: 0.4em 0.6em; }
+    .zt-balloon-caption {
+        font-size: 0.8em; text-transform: uppercase; color: #999; margin-bottom: 0.3em;
+    }
+    .zt-balloon-row { display: flex; align-items: center; justify-content: space-between; gap: 0.8em; }
+
+    /* "Live now" key under the Timetable heading; the same red dot marks running entries */
+    .zt-tt-key { margin: -0.3em 0 0.8em; }
+    .zt-live-label {
+        display: inline-block; font-weight: bold; color: #c0392b;
+        text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.05em;
+    }
+    .zt-live-label::before {
+        content: ''; display: inline-block; width: 0.6em; height: 0.6em; border-radius: 50%;
+        background: #e74c3c; margin-right: 0.4em; vertical-align: middle;
+    }
+
+    /* The VC plugins render "mini" buttons; use the regular "small" size in our popups */
+    .zt-buttons .ui.mini.buttons .button,
+    .zt-buttons .ui.mini.buttons .label,
+    .zt-buttons .ui.mini.button,
+    .zt-buttons .ui.mini.label { font-size: 0.92857143rem; }
+    .zt-buttons .ui.mini.label img { height: 1.4em; }
+
+    /* Fallback link, only shown while the VC plugin's button element is undefined (script failed) */
+    .zt-fallback-join { display: none !important; }
+    .zt-join-wrap:has(> :not(:defined)) .zt-fallback-join { display: inline-block !important; }
+
+    /* Timetable grid marker. Absolutely positioned in the entry's top-right corner so it takes
+       no space in the block's layout (a floated marker pushed the title and time down a line). */
+    .timetableBlock .zt-tt-marker {
+        position: absolute; top: 3px; right: 3px; z-index: 1;
+        display: inline-flex; align-items: center; line-height: 1;
+    }
+    .zt-tt-marker img {
+        width: 16px; height: 16px; background: #fff; border-radius: 3px; padding: 1px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+    }
+    .zt-tt-join, .zt-tt-join:visited {
+        gap: 4px; padding: 3px 8px 3px 3px; border-radius: 4px;
+        background: #2185d0; color: #fff !important; font-size: 12px; font-weight: bold;
+        text-decoration: none !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+    }
+    .zt-tt-join:hover { background: #1678c2; }
+    .zt-tt-join.zt-tt-join-passcode { background: #f2711c; }
+    .zt-tt-join.zt-tt-join-passcode:hover { background: #f26202; }
+    .zt-tt-join img { box-shadow: none; }
+    /* Red "live" dot to the left of the marker while the entry is running. Drawn outside the
+       marker's box, so the marker keeps its size (the layout code measures the marker). */
+    .zt-tt-marker.zt-tt-live::before {
+        content: ''; position: absolute; right: 100%; top: 50%; margin: -4px 5px 0 0;
+        width: 8px; height: 8px; border-radius: 50%; background: #e74c3c;
+        box-shadow: 0 0 0 2px #fff; animation: zt-live-pulse 2s ease-in-out infinite;
+    }
+    @keyframes zt-live-pulse { 50% { box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(231, 76, 60, 0.35); } }
+    @media (prefers-reduced-motion: reduce) { .zt-tt-marker.zt-tt-live::before { animation: none; } }
+    /* Keep the entry title clear of the marker */
+    /* (the live dot needs another ~14px) */
+    .timetableBlock:has(.zt-tt-join) .timetableBlockTitle { padding-right: 70px; }
+    .timetableBlock:has(.zt-tt-join.zt-tt-live) .timetableBlockTitle { padding-right: 84px; }
+    .timetableBlock:has(span.zt-tt-marker) .timetableBlockTitle,
+    .timetableBlock.zt-tt-tight .timetableBlockTitle { padding-right: 24px; }
+    .timetableBlock:has(span.zt-tt-marker.zt-tt-live) .timetableBlockTitle,
+    .timetableBlock.zt-tt-tight:has(.zt-tt-live) .timetableBlockTitle { padding-right: 38px; }
+    .timetableBlock.zt-tt-tighter .timetableBlockTitle { padding-right: 0 !important; }
+    /* Very short entries: drop the label, keep a compact icon button */
+    .zt-tt-compact .zt-tt-join-label, .zt-tt-fit-compact .zt-tt-join-label { display: none; }
+    .zt-tt-compact.zt-tt-join, .zt-tt-fit-compact.zt-tt-join { padding: 2px; }
+</style>

@@ -1,0 +1,240 @@
+<script>
+    (function() {
+        'use strict';
+        var markers = {{ markers | tojson }};
+        var joinCaption = {{ _('Join') | tojson }};
+        var liveCaption = {{ _('Live now') | tojson }};
+        // markers.now is the server time when the page was rendered: correct for a wrong client clock
+        var clockOffset = markers.now - Date.now();
+        var LIVE_DOT_SPACE = 14;  // the red dot is drawn left of the marker (see styles.html)
+        var tracked = [];
+
+        // only session blocks get a join button (not contributions)
+        function lookup(data) {
+            if (data && data.entryType === 'Session' && data.sessionSlotId != null) {
+                return markers.blocks[data.sessionSlotId] || null;
+            }
+            return null;
+        }
+
+        // with a few px of margin, so small later layout shifts (hover/selection styles) can't make
+        // a marker that was just clear of the time label cover it
+        function overlap(a, b, margin) {
+            margin = margin || 0;
+            return a.left < b.right + margin && b.left < a.right + margin &&
+                   a.top < b.bottom + margin && b.top < a.bottom + margin;
+        }
+
+        function isLive(info) {
+            if (!markers.live || info.start == null || info.end == null) {
+                return false;
+            }
+            var now = Date.now() + clockOffset;
+            return now >= info.start - markers.lead && now < info.end;
+        }
+
+        // left edge of the marker including its live dot
+        function markerLeft(marker) {
+            return marker.getBoundingClientRect().left -
+                (marker.classList.contains('zt-tt-live') ? LIVE_DOT_SPACE : 0);
+        }
+
+        function timeHidden(block, time) {
+            // Indico lays the entry out as a wrapping flex column: when the title gets too tall the
+            // time is wrapped into a second column outside the visible entry
+            var b = block.getBoundingClientRect();
+            var t = time.getBoundingClientRect();
+            return t.right > b.right + 1 || t.bottom > b.bottom + 1;
+        }
+
+        // Make room for the marker without hiding any of the entry's text:
+        // - the title is padded so it doesn't run under the marker; if that padding makes the time
+        //   label drop out of the entry, use the compact (icon-only) marker and a smaller padding;
+        // - in short entries the time label (bottom right) reaches the marker: move the marker to
+        //   the left of the time; if it then doesn't fit, use the compact marker.
+        // Idempotent, so it can run again whenever the entry is (re)laid out.
+        function fitMarker(marker) {
+            var block = marker.closest('.timetableBlock');
+            var time = block && block.querySelector('.timetableBlockTime, .timetableBlockTimeDiscreet');
+            if (!time) {
+                return;
+            }
+            marker.style.right = '';
+            marker.classList.remove('zt-tt-fit-compact');
+            block.classList.remove('zt-tt-tight', 'zt-tt-tighter');
+            var t = time.getBoundingClientRect();
+            if (!t.width) {
+                return;  // not laid out yet; the resize observer will call us again
+            }
+            if (timeHidden(block, time)) {
+                marker.classList.add('zt-tt-fit-compact');
+                block.classList.add('zt-tt-tight');
+                if (timeHidden(block, time)) {
+                    block.classList.replace('zt-tt-tight', 'zt-tt-tighter');
+                    if (timeHidden(block, time)) {
+                        block.classList.remove('zt-tt-tighter');  // overflows even without us
+                    }
+                }
+                t = time.getBoundingClientRect();
+            }
+            if (!overlap(marker.getBoundingClientRect(), t, 4)) {
+                return;
+            }
+            var b = block.getBoundingClientRect();
+            marker.style.right = Math.ceil(b.right - t.left + 4) + 'px';
+            if (markerLeft(marker) < b.left + 4) {
+                marker.classList.add('zt-tt-fit-compact');
+                if (markerLeft(marker) < b.left + 4) {
+                    marker.style.right = '';  // nothing fits: keep it in the corner
+                }
+            }
+        }
+
+        // The entry is attached (and maybe only laid out later, e.g. in a hidden day tab) after the
+        // decorators are created, so fit once it is in the page and again whenever its size changes.
+        function watchMarker(marker, attempt) {
+            window.requestAnimationFrame(function() {
+                var block = marker.closest('.timetableBlock');
+                if (!block) {
+                    if ((attempt || 0) < 20) {
+                        watchMarker(marker, (attempt || 0) + 1);  // not attached yet
+                    }
+                    return;
+                }
+                fitMarker(marker);
+                if (window.ResizeObserver) {
+                    new ResizeObserver(function(entries, observer) {
+                        if (!marker.isConnected) {
+                            observer.disconnect();
+                            return;
+                        }
+                        fitMarker(marker);
+                    }).observe(block);
+                }
+            });
+        }
+
+        // Show/hide the red "live" dot; re-fit the marker when that changes (the dot needs room)
+        function applyLive(marker, info) {
+            var live = isLive(info);
+            if (marker.classList.contains('zt-tt-live') === live) {
+                return;
+            }
+            marker.classList.toggle('zt-tt-live', live);
+            marker.title = live ? liveCaption + ' \u00b7 ' + info.title : info.title;
+            if (marker.isConnected) {
+                fitMarker(marker);
+            }
+        }
+
+        function refreshLive() {
+            // forget markers that were removed by a redraw (or never made it into the page)
+            tracked = tracked.filter(function(item) {
+                return item.marker.isConnected || (!item.attached && Date.now() - item.created < 60000);
+            });
+            tracked.forEach(function(item) {
+                if (item.marker.isConnected) {
+                    item.attached = true;
+                    applyLive(item.marker, item.info);
+                }
+            });
+        }
+
+        function buildMarker(info, display) {
+            // With a usable join link the marker is a real "Join" button that opens the meeting
+            // directly; otherwise it is just an icon (clicking the entry opens the popup, whose
+            // button explains what is needed, e.g. logging in or registering).
+            var el;
+            if (info.url) {
+                el = document.createElement('a');
+                el.className = 'zt-tt-marker zt-tt-join' + (info.needsPasscode ? ' zt-tt-join-passcode' : '');
+                el.href = info.url;
+                el.target = '_blank';
+                el.rel = 'noopener noreferrer';
+                el.title = info.title;
+                // Don't let the timetable open its popup (or start a drag) when clicking the button
+                el.addEventListener('click', function(evt) {
+                    evt.stopPropagation();
+                });
+                el.addEventListener('mousedown', function(evt) {
+                    evt.stopPropagation();
+                });
+            } else {
+                el = document.createElement('span');
+                el.className = 'zt-tt-marker';
+                el.title = info.title;
+                // The marker sits outside the element the timetable listens on, so forward clicks
+                // to it: clicking the icon opens the entry's popup like clicking the entry does.
+                el.addEventListener('click', function(evt) {
+                    var target = display && display.div && display.div.dom;
+                    if (target && target !== evt.target && !target.contains(evt.target)) {
+                        evt.stopPropagation();
+                        target.dispatchEvent(new MouseEvent('click', {
+                            bubbles: true, cancelable: true, view: window,
+                            clientX: evt.clientX, clientY: evt.clientY, screenX: evt.screenX, screenY: evt.screenY
+                        }));
+                    }
+                });
+            }
+            var img = document.createElement('img');
+            img.src = info.icon;
+            img.alt = '';
+            el.appendChild(img);
+            if (info.url) {
+                var label = document.createElement('span');
+                label.className = 'zt-tt-join-label';
+                label.textContent = joinCaption;
+                el.appendChild(label);
+            }
+            applyLive(el, info);
+            tracked.push({marker: el, info: info, attached: false, created: Date.now()});
+            return el;
+        }
+
+        function patch(cls) {
+            if (!cls || !cls.prototype || cls.prototype.__zoomTimetablePatched) {
+                return;
+            }
+            var orig = cls.prototype._getRightSideDecorators;
+            if (typeof orig !== 'function') {
+                return;
+            }
+            cls.prototype.__zoomTimetablePatched = true;
+            cls.prototype._getRightSideDecorators = function() {
+                var res = orig.apply(this, arguments);
+                try {
+                    var info = lookup(this.eventData);
+                    if (info && res && res.dom) {
+                        var marker = buildMarker(info, this);
+                        // Narrow or very short entries only get the icon, not the "Join" label
+                        if ((this.width != null && this.width < 160) || (this.height != null && this.height < 24)) {
+                            marker.classList.add('zt-tt-compact');
+                        }
+                        res.dom.appendChild(marker);
+                        watchMarker(marker);
+                    }
+                } catch (e) {
+                    // never break the timetable because of a marker
+                }
+                return res;
+            };
+        }
+
+        function patchAll() {
+            patch(window.TimetableBlockNormalDisplay);
+            patch(window.TimetableBlockWholeDayDisplay);
+        }
+
+        patchAll();
+        document.addEventListener('DOMContentLoaded', patchAll);
+        if (markers.live) {
+            // entries start/stop being live while the page is open
+            window.setInterval(refreshLive, 30000);
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    refreshLive();
+                }
+            });
+        }
+    })();
+</script>

@@ -1,0 +1,10 @@
+{#- zoom_timetable plugin: append the videoconference join button inside the timetable popup -#}
+{% set _zt_orig %}{% include '~events/timetable/balloons/block.html' %}{% endset %}
+{% set _zt_extra = template_hook('zoom-timetable-balloon', block=block) %}
+{% if _zt_extra %}
+    {#- insert before the closing tag of the outer .balloon div -#}
+    {% set _zt_parts = _zt_orig.rsplit('</div>', 1) %}
+    {{- _zt_parts[0] }}{{ _zt_extra }}</div>{{ _zt_parts[1] -}}
+{% else %}
+    {{- _zt_orig -}}
+{% endif %}

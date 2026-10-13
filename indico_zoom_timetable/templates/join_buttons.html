@@ -1,0 +1,7 @@
+<span class="zt-join-wrap">
+    {{- buttons -}}
+    {%- if url -%}
+        <a class="zt-fallback-join ui small button {{ 'orange' if needs_passcode else 'blue' }}" href="{{ url }}"
+           target="_blank" rel="noopener noreferrer" title="{{ title }}">{% trans %}Join{% endtrans %}</a>
+    {%- endif -%}
+</span>
