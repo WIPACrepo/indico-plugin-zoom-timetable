@@ -1,0 +1,37 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install tools
+        run: pip install ruff jinja2 build
+
+      # Style, unused imports, undefined names, import order, quotes (config in pyproject.toml)
+      - name: Ruff
+        run: ruff check --output-format=github .
+
+      # Byte-compile every Python file to catch syntax errors
+      - name: Python syntax
+        run: python -m compileall -q indico_zoom_timetable hatch_build.py
+
+      # Parse (not render) all Jinja templates
+      - name: Template syntax
+        run: python .github/scripts/check_templates.py
+
+      # Ensure the sdist/wheel still build (validates pyproject.toml and the hatch build hook)
+      - name: Build package
+        run: python -m build

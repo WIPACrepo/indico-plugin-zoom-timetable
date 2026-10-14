@@ -43,7 +43,10 @@ blocks on the Timetable page of **Conference** events. See `README.md` for user-
 
 ## Development
 
-- No test suite or linter config in the repo. Follow Indico code style (single quotes, ~120 cols).
+- No test suite. Follow Indico code style (single quotes, ~120 cols); `ruff check .` enforces it
+  (config in `pyproject.toml`).
+- CI (`.github/workflows/lint.yml`): ruff, Python byte-compile, Jinja template parse
+  (`.github/scripts/check_templates.py`), and `python -m build`.
 - Install into an Indico dev environment: `pip install -e .`, then add `'zoom_timetable'` to
   `PLUGINS` in `indico.conf` (alongside `vc_zoom`).
 - Manual verification: a Conference event with a Zoom room linked to a session block; check the
