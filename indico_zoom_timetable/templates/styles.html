@@ -49,7 +49,7 @@
         box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
     }
     .zt-tt-join, .zt-tt-join:visited {
-        gap: 4px; padding: 3px 8px 3px 3px; border-radius: 4px;
+        gap: 4px; padding: 3px 6px 3px 3px; border-radius: 4px;
         background: #2185d0; color: #fff !important; font-size: 12px; font-weight: bold;
         text-decoration: none !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
         cursor: pointer;
@@ -66,7 +66,14 @@
         border-top-right-radius: 0; border-bottom-right-radius: 0;
         box-shadow: none;
     }
-    .timetableBlock:has(.entry-attachments) .zt-tt-marker img { width: 15px; height: 15px; box-sizing: border-box; }
+    .timetableBlock:has(.entry-attachments) .zt-tt-marker img {
+        width: 15px; height: 15px;
+        box-sizing: border-box;
+        margin-top: -1px;
+    }
+    .timetableBlock:has(.entry-attachments) .zt-tt-marker::before {
+        margin-top: -1px;
+    }
     /* Red "live" dot to the left of the marker while the entry is running. Drawn outside the
        marker's box, so the marker keeps its size (the layout code measures the marker). */
     .zt-tt-marker.zt-tt-live::before {
