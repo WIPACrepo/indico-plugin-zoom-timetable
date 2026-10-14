@@ -75,9 +75,14 @@
     }
     @keyframes zt-live-pulse { 50% { box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(231, 76, 60, 0.35); } }
     @media (prefers-reduced-motion: reduce) { .zt-tt-marker.zt-tt-live::before { animation: none; } }
+    /* On a "Join" button the dot is drawn inside its colored background instead, as the first flex
+       item (before the icon), so the button grows by the dot's width and the layout code needs no
+       extra room for it */
+    .zt-tt-join.zt-tt-live::before { position: static; margin: 0; flex-shrink: 0; }
+    .timetableBlock .zt-tt-join.zt-tt-live { padding-left: 6px; }
     /* Keep the entry title and conveners (the line below the title) clear of the marker */
-    /* (the live dot needs another ~14px; Indico's materials button, which the marker is moved
-       left of, another ~24px) */
+    /* (the live dot needs another ~14px, outside an icon-only marker or inside a "Join" button;
+       Indico's materials button, which the marker is moved left of, another ~24px) */
     .timetableBlock:has(.entry-attachments) { --zt-att-space: 24px; }
     .timetableBlock:has(.zt-tt-join) :is(.timetableBlockTitle, .timetableBlockConvener) {
         padding-right: calc(70px + var(--zt-att-space, 0px));

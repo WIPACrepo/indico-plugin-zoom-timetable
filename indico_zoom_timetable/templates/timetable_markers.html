@@ -6,7 +6,7 @@
         var liveCaption = {{ _('Live now') | tojson }};
         // markers.now is the server time when the page was rendered: correct for a wrong client clock
         var clockOffset = markers.now - Date.now();
-        var LIVE_DOT_SPACE = 14;  // the red dot is drawn left of the marker (see styles.html)
+        var LIVE_DOT_SPACE = 14;  // the red dot is drawn left of an icon-only marker (see styles.html)
         var tracked = [];
 
         // only session blocks get a join button (not contributions)
@@ -33,10 +33,10 @@
             return now >= info.start - markers.lead && now < info.end;
         }
 
-        // left edge of the marker including its live dot
+        // left edge of the marker including its live dot (a "Join" button has the dot inside it)
         function markerLeft(marker) {
-            return marker.getBoundingClientRect().left -
-                (marker.classList.contains('zt-tt-live') ? LIVE_DOT_SPACE : 0);
+            var outside = marker.classList.contains('zt-tt-live') && !marker.classList.contains('zt-tt-join');
+            return marker.getBoundingClientRect().left - (outside ? LIVE_DOT_SPACE : 0);
         }
 
         // Resting position of the marker: the block's top-right corner, or directly left of (touching)
