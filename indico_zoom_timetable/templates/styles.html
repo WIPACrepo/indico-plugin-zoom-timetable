@@ -63,7 +63,8 @@
     /* ...and joined to it as one strip: square right corners, no shadow falling on it */
     .timetableBlock:has(.entry-attachments) .zt-tt-join {
         padding-top: 0; padding-bottom: 0;
-        border-radius: 0; box-shadow: none;
+        border-top-right-radius: 0; border-bottom-right-radius: 0;
+        box-shadow: none;
     }
     .timetableBlock:has(.entry-attachments) .zt-tt-marker img { width: 15px; height: 15px; box-sizing: border-box; }
     /* Red "live" dot to the left of the marker while the entry is running. Drawn outside the
@@ -78,7 +79,7 @@
     /* On a "Join" button the dot is drawn inside its colored background instead, as the first flex
        item (before the icon), so the button grows by the dot's width and the layout code needs no
        extra room for it */
-    .zt-tt-join.zt-tt-live::before { position: static; margin: 0; flex-shrink: 0; }
+    .zt-tt-join.zt-tt-live::before { position: static; margin: 0 1px 0 -1px; flex-shrink: 0; }
     .timetableBlock .zt-tt-join.zt-tt-live { padding-left: 6px; }
     /* Keep the entry title and conveners (the line below the title) clear of the marker */
     /* (the live dot needs another ~14px, outside an icon-only marker or inside a "Join" button;
