@@ -63,7 +63,7 @@
     /* ...and joined to it as one strip: square right corners, no shadow falling on it */
     .timetableBlock:has(.entry-attachments) .zt-tt-join {
         padding-top: 0; padding-bottom: 0;
-        border-top-right-radius: 0; border-bottom-right-radius: 0; box-shadow: none;
+        border-radius: 0; box-shadow: none;
     }
     .timetableBlock:has(.entry-attachments) .zt-tt-marker img { width: 15px; height: 15px; box-sizing: border-box; }
     /* Red "live" dot to the left of the marker while the entry is running. Drawn outside the
@@ -75,23 +75,25 @@
     }
     @keyframes zt-live-pulse { 50% { box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(231, 76, 60, 0.35); } }
     @media (prefers-reduced-motion: reduce) { .zt-tt-marker.zt-tt-live::before { animation: none; } }
-    /* Keep the entry title clear of the marker */
+    /* Keep the entry title and conveners (the line below the title) clear of the marker */
     /* (the live dot needs another ~14px; Indico's materials button, which the marker is moved
        left of, another ~24px) */
     .timetableBlock:has(.entry-attachments) { --zt-att-space: 24px; }
-    .timetableBlock:has(.zt-tt-join) .timetableBlockTitle {
+    .timetableBlock:has(.zt-tt-join) :is(.timetableBlockTitle, .timetableBlockConvener) {
         padding-right: calc(70px + var(--zt-att-space, 0px));
     }
-    .timetableBlock:has(.zt-tt-join.zt-tt-live) .timetableBlockTitle {
+    .timetableBlock:has(.zt-tt-join.zt-tt-live) :is(.timetableBlockTitle, .timetableBlockConvener) {
         padding-right: calc(84px + var(--zt-att-space, 0px));
     }
-    .timetableBlock:has(span.zt-tt-marker) .timetableBlockTitle,
-    .timetableBlock.zt-tt-tight .timetableBlockTitle { padding-right: calc(24px + var(--zt-att-space, 0px)); }
-    .timetableBlock:has(span.zt-tt-marker.zt-tt-live) .timetableBlockTitle,
-    .timetableBlock.zt-tt-tight:has(.zt-tt-live) .timetableBlockTitle {
+    .timetableBlock:has(span.zt-tt-marker) :is(.timetableBlockTitle, .timetableBlockConvener),
+    .timetableBlock.zt-tt-tight :is(.timetableBlockTitle, .timetableBlockConvener) {
+        padding-right: calc(24px + var(--zt-att-space, 0px));
+    }
+    .timetableBlock:has(span.zt-tt-marker.zt-tt-live) :is(.timetableBlockTitle, .timetableBlockConvener),
+    .timetableBlock.zt-tt-tight:has(.zt-tt-live) :is(.timetableBlockTitle, .timetableBlockConvener) {
         padding-right: calc(38px + var(--zt-att-space, 0px));
     }
-    .timetableBlock.zt-tt-tighter .timetableBlockTitle { padding-right: 0 !important; }
+    .timetableBlock.zt-tt-tighter :is(.timetableBlockTitle, .timetableBlockConvener) { padding-right: 0 !important; }
     /* Very short entries: drop the label, keep a compact icon button */
     .zt-tt-compact .zt-tt-join-label, .zt-tt-fit-compact .zt-tt-join-label { display: none; }
     .zt-tt-compact.zt-tt-join, .zt-tt-fit-compact.zt-tt-join { padding: 2px; }
