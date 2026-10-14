@@ -6,7 +6,7 @@
         var liveCaption = {{ _('Live now') | tojson }};
         // markers.now is the server time when the page was rendered: correct for a wrong client clock
         var clockOffset = markers.now - Date.now();
-        var LIVE_DOT_SPACE = 14;  // the red dot is drawn left of the marker (see styles.html)
+        var LIVE_DOT_SPACE = 14;  // the red dot is drawn left of an icon-only marker (see styles.html)
         var tracked = [];
 
         // only session blocks get a join button (not contributions)
@@ -33,10 +33,22 @@
             return now >= info.start - markers.lead && now < info.end;
         }
 
-        // left edge of the marker including its live dot
+        // left edge of the marker including its live dot (a "Join" button has the dot inside it)
         function markerLeft(marker) {
-            return marker.getBoundingClientRect().left -
-                (marker.classList.contains('zt-tt-live') ? LIVE_DOT_SPACE : 0);
+            var outside = marker.classList.contains('zt-tt-live') && !marker.classList.contains('zt-tt-join');
+            return marker.getBoundingClientRect().left - (outside ? LIVE_DOT_SPACE : 0);
+        }
+
+        // Resting position of the marker: the block's top-right corner, or directly left of (touching)
+        // Indico's materials button (a.entry-attachments, absolutely positioned in that corner) when the
+        // entry has one. Measured within the positioned parent both share, so borders don't add a gap.
+        function restingRight(block, marker) {
+            var att = block.querySelector('.entry-attachments');
+            var parent = att && att.offsetParent;
+            if (!parent || !att.offsetWidth || parent !== marker.offsetParent) {
+                return '';
+            }
+            return (parent.clientWidth - att.offsetLeft) + 'px';
         }
 
         function timeHidden(block, time) {
@@ -48,8 +60,9 @@
         }
 
         // Make room for the marker without hiding any of the entry's text:
-        // - the title is padded so it doesn't run under the marker; if that padding makes the time
+        // - the header (title, conveners) is padded so it doesn't run under the marker; if that padding makes the time
         //   label drop out of the entry, use the compact (icon-only) marker and a smaller padding;
+        // - if the entry has materials, the marker sits left of Indico's materials button;
         // - in short entries the time label (bottom right) reaches the marker: move the marker to
         //   the left of the time; if it then doesn't fit, use the compact marker.
         // Idempotent, so it can run again whenever the entry is (re)laid out.
@@ -59,7 +72,8 @@
             if (!time) {
                 return;
             }
-            marker.style.right = '';
+            var resting = restingRight(block, marker);
+            marker.style.right = resting;
             marker.classList.remove('zt-tt-fit-compact');
             block.classList.remove('zt-tt-tight', 'zt-tt-tighter');
             var t = time.getBoundingClientRect();
@@ -81,11 +95,11 @@
                 return;
             }
             var b = block.getBoundingClientRect();
-            marker.style.right = Math.ceil(b.right - t.left + 4) + 'px';
+            marker.style.right = Math.max(Math.ceil(b.right - t.left + 4), parseInt(resting, 10) || 0) + 'px';
             if (markerLeft(marker) < b.left + 4) {
                 marker.classList.add('zt-tt-fit-compact');
                 if (markerLeft(marker) < b.left + 4) {
-                    marker.style.right = '';  // nothing fits: keep it in the corner
+                    marker.style.right = resting;  // nothing fits: keep it in its resting position
                 }
             }
         }

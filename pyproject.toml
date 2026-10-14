@@ -45,3 +45,25 @@ artifacts = [
 [tool.hatch.build.targets.sdist.hooks.custom]
 path = 'hatch_build.py'
 dependencies = ['babel==2.16.0']
+
+[tool.ruff]
+target-version = 'py312'
+line-length = 120
+
+[tool.ruff.lint]
+# pyflakes, pycodestyle, isort, bugbear, quotes, pyupgrade, comprehensions
+select = ['F', 'E', 'W', 'I', 'B', 'Q', 'UP', 'C4']
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = 'single'
+multiline-quotes = 'double'
+docstring-quotes = 'double'
+
+[tool.ruff.lint.isort]
+# Same import grouping as Indico core: stdlib, third-party, indico, this plugin
+known-first-party = ['indico_zoom_timetable']
+section-order = ['future', 'standard-library', 'third-party', 'indico', 'first-party', 'local-folder']
+lines-after-imports = 2
+
+[tool.ruff.lint.isort.sections]
+indico = ['indico']
