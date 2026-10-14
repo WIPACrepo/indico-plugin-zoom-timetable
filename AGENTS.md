@@ -22,6 +22,8 @@ blocks on the Timetable page of **Conference** events. See `README.md` for user-
 - **Grid markers** (`timetable_markers.html`): server emits JSON (block id → icon, title, url,
   start/end, server `now`, lead time); browser JS places buttons and computes the "live" dot
   (every 30 s and on tab visibility change), correcting for client clock offset.
+  Buttons sit in the block's top-right corner, or left of Indico's materials button
+  (`a.entry-attachments`) when the block has materials.
 - **Popup buttons** (`balloon_room.html`, `join_buttons.html`): rendered by the VC plugin's own
   `vc_room_timetable_buttons.html`, plus a plain-link fallback if the custom element never loads.
 - **Asset injection**: `_inject_vc_plugin_bundles` adds VC plugins' `main.js`/`main.css` on
