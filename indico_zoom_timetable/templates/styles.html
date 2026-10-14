@@ -81,25 +81,29 @@
        extra room for it */
     .zt-tt-join.zt-tt-live::before { position: static; margin: 0 1px 0 -1px; flex-shrink: 0; }
     .timetableBlock .zt-tt-join.zt-tt-live { padding-left: 6px; }
-    /* Keep the entry title and conveners (the line below the title) clear of the marker */
-    /* (the live dot needs another ~14px, outside an icon-only marker or inside a "Join" button;
+    /* Keep the entry's header clear of the marker. Padding goes on the header wrapper (Indico's first
+       .timetableBlockWrapper: title, conveners, ...) rather than on each item, so every item in it is
+       covered, including ones Indico may add later, and items sharing a line aren't padded twice. The
+       footer wrapper (location, time) is not padded: the layout code moves the marker clear of the time.
+       (the live dot needs another ~14px, outside an icon-only marker or inside a "Join" button;
        Indico's materials button, which the marker is moved left of, another ~24px) */
     .timetableBlock:has(.entry-attachments) { --zt-att-space: 24px; }
-    .timetableBlock:has(.zt-tt-join) :is(.timetableBlockTitle, .timetableBlockConvener) {
+    .timetableBlock:has(.zt-tt-marker) .timetableBlockWrapper:has(> .timetableBlockTitle) { box-sizing: border-box; }
+    .timetableBlock:has(.zt-tt-join) .timetableBlockWrapper:has(> .timetableBlockTitle) {
         padding-right: calc(70px + var(--zt-att-space, 0px));
     }
-    .timetableBlock:has(.zt-tt-join.zt-tt-live) :is(.timetableBlockTitle, .timetableBlockConvener) {
+    .timetableBlock:has(.zt-tt-join.zt-tt-live) .timetableBlockWrapper:has(> .timetableBlockTitle) {
         padding-right: calc(84px + var(--zt-att-space, 0px));
     }
-    .timetableBlock:has(span.zt-tt-marker) :is(.timetableBlockTitle, .timetableBlockConvener),
-    .timetableBlock.zt-tt-tight :is(.timetableBlockTitle, .timetableBlockConvener) {
+    .timetableBlock:has(span.zt-tt-marker) .timetableBlockWrapper:has(> .timetableBlockTitle),
+    .timetableBlock.zt-tt-tight .timetableBlockWrapper:has(> .timetableBlockTitle) {
         padding-right: calc(24px + var(--zt-att-space, 0px));
     }
-    .timetableBlock:has(span.zt-tt-marker.zt-tt-live) :is(.timetableBlockTitle, .timetableBlockConvener),
-    .timetableBlock.zt-tt-tight:has(.zt-tt-live) :is(.timetableBlockTitle, .timetableBlockConvener) {
+    .timetableBlock:has(span.zt-tt-marker.zt-tt-live) .timetableBlockWrapper:has(> .timetableBlockTitle),
+    .timetableBlock.zt-tt-tight:has(.zt-tt-live) .timetableBlockWrapper:has(> .timetableBlockTitle) {
         padding-right: calc(38px + var(--zt-att-space, 0px));
     }
-    .timetableBlock.zt-tt-tighter :is(.timetableBlockTitle, .timetableBlockConvener) { padding-right: 0 !important; }
+    .timetableBlock.zt-tt-tighter .timetableBlockWrapper:has(> .timetableBlockTitle) { padding-right: 0 !important; }
     /* Very short entries: drop the label, keep a compact icon button */
     .zt-tt-compact .zt-tt-join-label, .zt-tt-fit-compact .zt-tt-join-label { display: none; }
     .zt-tt-compact.zt-tt-join, .zt-tt-fit-compact.zt-tt-join { padding: 2px; }

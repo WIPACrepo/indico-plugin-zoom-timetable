@@ -54,4 +54,7 @@ blocks on the Timetable page of **Conference** events. See `README.md` for user-
 - Manual verification: a Conference event with a Zoom room linked to a session block; check the
   timetable grid button, the block popup, and the live dot/key with each setting on and off.
 - After an Indico upgrade, confirm the overridden templates still have the expected block names
-  and markup (`content` block; balloon's outer `</div>`).
+  and markup (`content` block; balloon's outer `</div>`), and that the legacy timetable JS
+  (`Draw.js`) still uses the classes the grid markers rely on: `.timetableBlock`,
+  `.timetableBlockWrapper` > `.timetableBlockTitle`, `.timetableBlockTime(Discreet)`, `.entry-attachments`,
+  and the `_getRightSideDecorators` method.
